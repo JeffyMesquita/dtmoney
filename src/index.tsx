@@ -1,22 +1,47 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { createServer } from 'miragejs';
+import { createServer, Model } from 'miragejs';
 import { App } from './App';
 
 createServer({
-  routes() {
-    this.namespace = '/api';
-    this.get('/transactions', () => {
-      return [
+  models: {
+    transaction: Model,
+  },
+
+  seeds(server) {
+    server.db.loadData({
+      transactions: [
         {
           id: 1,
-          title: 'Transaction',
-          value: 'R$ 18.90',
+          title: 'Salário',
           type: 'deposit',
-          category: 'food',
-          createdAt: new Date(),
+          category: 'salaryPayment',
+          amount: 3200,
+          createdAt: new Date('2021-03-10 10:00:00'),
         },
-      ];
+        {
+          id: 2,
+          title: 'Conta de Luz',
+          type: 'withdraw',
+          category: 'utilities',
+          amount: 265,
+          createdAt: new Date('2021-03-10 10:00:00'),
+        },
+      ],
+    });
+  },
+
+  routes() {
+    this.namespace = '/api';
+
+    this.get('/transactions', () => {
+      return this.schema.all('transaction');
+    });
+
+    this.post('/transactions', (schema, request) => {
+      const data = JSON.parse(request.requestBody);
+
+      return schema.create('transaction', data);
     });
   },
 });
